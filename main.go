@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bufio"
+	// "bufio"
 	"fmt"
 	"math/rand"
 	"net"
 	"os"
-	"strconv"
-	"strings"
+	// "strconv"
+	// "strings"
 	"time"
+	"encoding/hex"
 )
 
 const MIN = 1
@@ -46,20 +47,29 @@ func main() {
 
 func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
-        for {
-                netData, err := bufio.NewReader(c).ReadString('\n')
-                if err != nil {
-                        fmt.Println(err)
-                        return
-                }
+	buf := make([]byte, 1024)
+	// Read the incoming connection into the buffer.
+	_, err := c.Read(buf)
+	if err != nil {
+		fmt.Println("Error reading:", err.Error())
+	}
+	fmt.Printf(hex.EncodeToString(buf))
+	// Send a response back to person contacting us.
+	// c.Write([]byte("Message received."))
+	// Close the connection when you're done with it.
 
-                temp := strings.TrimSpace(string(netData))
-                if temp == "STOP" {
-                        break
-                }
+	// netData, err := bufio.NewReader(c).ReadString('\n')
+	// if err != nil {
+	//         fmt.Println(err)
+	//         return
+	// }
 
-                result := strconv.Itoa(random()) + "\n"
-                c.Write([]byte(string(result)))
-        }
+	// temp := strings.TrimSpace(string(netData))
+	// if temp == "STOP" {
+	//         break
+	// }
+
+	// result := strconv.Itoa(random()) + "\n"
+	// c.Write([]byte(string(result)))
         c.Close()
 }

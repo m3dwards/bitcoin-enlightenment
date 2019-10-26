@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "bufio"
+	"bufio"
 	"fmt"
 	"math/rand"
 	"net"
@@ -47,13 +47,28 @@ func main() {
 
 func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
-	buf := make([]byte, 1024)
-	// Read the incoming connection into the buffer.
-	_, err := c.Read(buf)
-	if err != nil {
-		fmt.Println("Error reading:", err.Error())
+
+	scanner := bufio.NewScanner(c)
+
+	// Call Split to specify that we want to Scan each individual byte.
+	scanner.Split(bufio.ScanBytes)
+
+	// Use For-loop.
+	for scanner.Scan() {
+		// Get Bytes and display the byte.
+		b := scanner.Bytes()
+		dst := make([]byte, hex.EncodedLen(len(b)))
+		hex.Encode(dst, b)
+		fmt.Printf("%v = %s = %v\n", b, dst, string(b))
 	}
-	fmt.Printf(hex.EncodeToString(buf))
+
+	// buf := make([]byte, 1024)
+	// // Read the incoming connection into the buffer.
+	// _, err := c.Read(buf)
+	// if err != nil {
+	// 	fmt.Println("Error reading:", err.Error())
+	// }
+	// fmt.Printf(hex.EncodeToString(buf))
 	// Send a response back to person contacting us.
 	// c.Write([]byte("Message received."))
 	// Close the connection when you're done with it.

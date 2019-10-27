@@ -12,6 +12,15 @@ import (
 	"encoding/hex"
 )
 
+// Size in bytes of the various parts of a message header
+const (
+	HeaderMagicSize = 4
+	HeaderCommandSize = 12
+	HeaderLengthSize = 4
+	HeaderChecksumSize = 4
+	HeaderSize = HeaderMagicSize + HeaderCommandSize + HeaderLengthSize + HeaderChecksumSize
+)
+
 const MIN = 1
 const MAX = 100
 
@@ -48,18 +57,23 @@ func main() {
 func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
-	scanner := bufio.NewScanner(c)
+	buff := make([]byte, HeaderSize)
+	c := bufio.NewReader(conn)
 
-	// Call Split to specify that we want to Scan each individual byte.
-	scanner.Split(bufio.ScanBytes)
+	for {
+		// read a single byte which contains the message length
+		size, err := c.ReadByte()
+		if err != nil {
+			return err
+		}
 
-	// Use For-loop.
-	for scanner.Scan() {
-		// Get Bytes and display the byte.
-		b := scanner.Bytes()
-		dst := make([]byte, hex.EncodedLen(len(b)))
-		hex.Encode(dst, b)
-		fmt.Printf("%v = %s = %v\n", b, dst, string(b))
+		// read the full message, or return an error
+		_, err := io.ReadFull(c, buff[:int(size)])
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("received %x\n", buff[:int(size)])
 	}
 
 	// buf := make([]byte, 1024)

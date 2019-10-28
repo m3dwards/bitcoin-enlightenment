@@ -6,10 +6,11 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"io"
 	// "strconv"
 	// "strings"
 	"time"
-	"encoding/hex"
+	//"encoding/hex"
 )
 
 // Size in bytes of the various parts of a message header
@@ -58,19 +59,19 @@ func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
 	buff := make([]byte, HeaderSize)
-	c := bufio.NewReader(conn)
+	r := bufio.NewReader(c)
 
 	for {
 		// read a single byte which contains the message length
-		size, err := c.ReadByte()
+		size, err := r.ReadByte()
 		if err != nil {
-			return err
+			return
 		}
 
 		// read the full message, or return an error
-		_, err := io.ReadFull(c, buff[:int(size)])
+		_, err = io.ReadFull(r, buff[:int(size)])
 		if err != nil {
-			return err
+			return
 		}
 
 		fmt.Printf("received %x\n", buff[:int(size)])

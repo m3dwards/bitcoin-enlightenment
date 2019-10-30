@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bufio"
+	// "bufio"
 	"fmt"
 	"math/rand"
 	"net"
 	"os"
-	"io"
+	// "io"
 	// "strconv"
 	// "strings"
 	"time"
@@ -58,23 +58,33 @@ func main() {
 func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
-	buff := make([]byte, HeaderSize)
-	r := bufio.NewReader(c)
+	headerbuff := make([]byte, HeaderSize)
+	mainbuff := make([]byte, 112)
+
+	// r := bufio.NewReader(c)
 
 	for {
-		// read a single byte which contains the message length
-		size, err := r.ReadByte()
+
+		_, err := c.Read(headerbuff)
 		if err != nil {
-			return
+			fmt.Println("Error reading header:", err.Error())
+			break
 		}
+		// read a single byte which contains the message length
+		// size, err := r.ReadByte()
+		// if err != nil {
+		// 	return
+		// }
 
 		// read the full message, or return an error
-		_, err = io.ReadFull(r, buff[:int(size)])
+		_, err = c.Read(mainbuff)
 		if err != nil {
-			return
+			fmt.Println("Error reading body:", err.Error())
+			break
 		}
 
-		fmt.Printf("received %x\n", buff[:int(size)])
+		fmt.Printf("received header %x\n", headerbuff)
+		fmt.Printf("received %x\n", mainbuff)
 	}
 
 	// buf := make([]byte, 1024)

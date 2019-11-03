@@ -22,6 +22,9 @@ const (
 	HeaderSize = HeaderMagicSize + HeaderCommandSize + HeaderLengthSize + HeaderChecksumSize
 )
 
+const VERSION = "version"
+const VERACK = "verack"
+
 const MIN = 1
 const MAX = 100
 
@@ -64,7 +67,6 @@ func handleConnection(c net.Conn) {
 	// r := bufio.NewReader(c)
 
 	for {
-
 		_, err := c.Read(headerbuff)
 		if err != nil {
 			fmt.Println("Error reading header:", err.Error())

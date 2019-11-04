@@ -11,6 +11,7 @@ import (
 	// "strings"
 	"time"
 	//"encoding/hex"
+	"encoding/binary"
 )
 
 // Size in bytes of the various parts of a message header
@@ -62,32 +63,27 @@ func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
 	headerbuff := make([]byte, HeaderSize)
-	mainbuff := make([]byte, 112)
 
-	// r := bufio.NewReader(c)
-
-	for {
-		_, err := c.Read(headerbuff)
-		if err != nil {
-			fmt.Println("Error reading header:", err.Error())
-			break
-		}
-		// read a single byte which contains the message length
-		// size, err := r.ReadByte()
-		// if err != nil {
-		// 	return
-		// }
-
-		// read the full message, or return an error
-		_, err = c.Read(mainbuff)
-		if err != nil {
-			fmt.Println("Error reading body:", err.Error())
-			break
-		}
-
-		fmt.Printf("received header %x\n", headerbuff)
-		fmt.Printf("received %x\n", mainbuff)
+	_, err := c.Read(headerbuff)
+	if err != nil {
+		fmt.Println("Error reading header:", err.Error())
+		return
 	}
+
+        size := headerbuff[HeaderMagicSize + HeaderCommandSize: HeaderMagicSize + HeaderCommandSize + HeaderLengthSize]
+	sizeint := binary.LittleEndian.Uint32(size)
+	fmt.Println(size)
+	fmt.Println(sizeint)
+	messagebuff := make([]byte, sizeint)
+	// read the full message, or return an error
+	_, err = c.Read(messagebuff)
+	if err != nil {
+		fmt.Println("Error reading body:", err.Error())
+		return
+	}
+
+	fmt.Printf("received header %x\n", headerbuff)
+	fmt.Printf("received %x\n", messagebuff)
 
 	// buf := make([]byte, 1024)
 	// // Read the incoming connection into the buffer.

@@ -62,15 +62,15 @@ func main() {
 func handleConnection(c net.Conn) {
         fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
-	headerbuf := make([]byte, HeaderSize)
+	headerbuff := make([]byte, HeaderSize)
 
-	_, err := c.Read(headerbuf)
+	_, err := c.Read(headerbuff)
 	if err != nil {
 		fmt.Println("Error reading header:", err.Error())
 		return
 	}
 	HeaderLengthStarts := HeaderMagicSize + HeaderCommandSize
-        size := headerbuf[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
+        size := headerbuff[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
 	sizeint := binary.LittleEndian.Uint32(size)
 	fmt.Println(size)
 	fmt.Println(sizeint)
@@ -82,7 +82,7 @@ func handleConnection(c net.Conn) {
 		return
 	}
 
-	fmt.Printf("received header %x\n", headerbuf)
+	fmt.Printf("received header %x\n", headerbuff)
 	fmt.Printf("received %x\n", messagebuff)
 
 	// buf := make([]byte, 1024)

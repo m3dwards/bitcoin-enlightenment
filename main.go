@@ -8,9 +8,9 @@ import (
 	"os"
 	// "io"
 	// "strconv"
-	// "strings"
+	"strings"
 	"time"
-	//"encoding/hex"
+	"encoding/hex"
 	"encoding/binary"
 )
 
@@ -85,7 +85,38 @@ func handleConnection(c net.Conn) {
 	fmt.Printf("received header %x\n", headerbuff)
 	fmt.Printf("received %x\n", messagebuff)
 
-	c.Write([]byte{0xF9, 0xBE, 0xB4, 0xD9, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xF6, 0xE0, 0xE2})
+	decoded, err := hex.DecodeString(strings.Replace("16 1c 14 12 76 65 72 73 69 6f 6e 00 00 00 00 00 64 00 00 00 35 8d 49 32 62 ea 00 00 01 00 00 00 00 00 00 00 11 b2 d0 50 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 3b 2e b3 5d 8c e6 17 65 0f 2f 53 61 74 6f 73 68 69 3a 30 2e 37 2e 32 2f c0 3e 03 00", " ", "", -1))
+	if err != nil {
+		fmt.Println("Error decoding hex:", err.Error())
+		return
+	}
+
+	c.Write(decoded)
+
+	// time.Sleep(200 * time.Millisecond)
+
+	// _, err = c.Read(headerbuff)
+	// if err != nil {
+	// 	fmt.Println("Error reading header:", err.Error())
+	// 	return
+	// }
+
+        // size = headerbuff[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
+	// sizeint = binary.LittleEndian.Uint32(size)
+
+	// _, err = c.Read(messagebuff)
+	// if err != nil {
+	// 	fmt.Println("Error reading body:", err.Error())
+	// 	return
+	// }
+
+	// fmt.Printf("received header %x\n", headerbuff)
+	// fmt.Printf("received %x\n", messagebuff)
+
+	time.Sleep(200 * time.Millisecond)
+	// c.Write([]byte{0x16, 0x1c, 0x14, 0x14, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xF6, 0xE0, 0xE2})
+
+	time.Sleep(2000 * time.Millisecond)
 
 	// buf := make([]byte, 1024)
 	// // Read the incoming connection into the buffer.

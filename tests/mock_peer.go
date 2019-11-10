@@ -73,6 +73,7 @@ func main() {
                 return nil
             },
             OnVerAck: func(p *peer.Peer, msg *wire.MsgVerAck) {
+		fmt.Println("verack received")
                 verack <- struct{}{}
             },
         },

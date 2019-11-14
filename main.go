@@ -8,19 +8,19 @@ import (
 	"os"
 	// "io"
 	// "strconv"
+	"encoding/binary"
+	"encoding/hex"
 	"strings"
 	"time"
-	"encoding/hex"
-	"encoding/binary"
 )
 
 // Size in bytes of the various parts of a message header
 const (
-	HeaderMagicSize = 4
-	HeaderCommandSize = 12
-	HeaderLengthSize = 4
+	HeaderMagicSize    = 4
+	HeaderCommandSize  = 12
+	HeaderLengthSize   = 4
 	HeaderChecksumSize = 4
-	HeaderSize = HeaderMagicSize + HeaderCommandSize + HeaderLengthSize + HeaderChecksumSize
+	HeaderSize         = HeaderMagicSize + HeaderCommandSize + HeaderLengthSize + HeaderChecksumSize
 )
 
 const VERSION = "version"
@@ -34,42 +34,42 @@ func random() int {
 }
 
 func main() {
-        arguments := os.Args
-        if len(arguments) == 1 {
-                fmt.Println("Please provide a port number!")
-                return
-        }
+	arguments := os.Args
+	if len(arguments) == 1 {
+		fmt.Println("Please provide a port number!")
+		return
+	}
 
-        PORT := ":" + arguments[1]
-        l, err := net.Listen("tcp4", PORT)
-        if err != nil {
-                fmt.Println(err)
-                return
-        }
-        defer l.Close()
-        rand.Seed(time.Now().Unix())
+	PORT := ":" + arguments[1]
+	l, err := net.Listen("tcp4", PORT)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer l.Close()
+	rand.Seed(time.Now().Unix())
 
-        for {
-                c, err := l.Accept()
-                if err != nil {
-                        fmt.Println(err)
-                        return
-                }
-                go handleConnection(c)
-        }
+	for {
+		c, err := l.Accept()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		go handleConnection(c)
+	}
 }
 
 func createVerack() []byte {
-        decoded, err := hex.DecodeString(strings.Replace("16 1c 14 12 76 65 72 73 69 6f 6e 00 00 00 00 00 64 00 00 00 35 8d 49 32 62 ea 00 00 01 00 00 00 00 00 00 00 11 b2 d0 50 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 3b 2e b3 5d 8c e6 17 65 0f 2f 53 61 74 6f 73 68 69 3a 30 2e 37 2e 32 2f c0 3e 03 00", " ", "", -1))
+	decoded, err := hex.DecodeString(strings.Replace("16 1c 14 12 76 65 72 73 69 6f 6e 00 00 00 00 00 64 00 00 00 35 8d 49 32 62 ea 00 00 01 00 00 00 00 00 00 00 11 b2 d0 50 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 3b 2e b3 5d 8c e6 17 65 0f 2f 53 61 74 6f 73 68 69 3a 30 2e 37 2e 32 2f c0 3e 03 00", " ", "", -1))
 	if err != nil {
 		fmt.Println("Error decoding hex:", err.Error())
 		return nil
 	}
-        return decoded
+	return decoded
 }
 
 func handleConnection(c net.Conn) {
-        fmt.Printf("Serving %s\n", c.RemoteAddr().String())
+	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
 	headerbuff := make([]byte, HeaderSize)
 
@@ -79,7 +79,7 @@ func handleConnection(c net.Conn) {
 		return
 	}
 	HeaderLengthStarts := HeaderMagicSize + HeaderCommandSize
-        size := headerbuff[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
+	size := headerbuff[HeaderLengthStarts : HeaderLengthStarts+HeaderLengthSize]
 	sizeint := binary.LittleEndian.Uint32(size)
 	fmt.Println(size)
 	fmt.Println(sizeint)
@@ -93,7 +93,7 @@ func handleConnection(c net.Conn) {
 
 	fmt.Printf("received header %x\n", headerbuff)
 	fmt.Printf("received %x\n", messagebuff)
-	
+
 	c.Write(createVerack())
 
 	// time.Sleep(200 * time.Millisecond)
@@ -104,7 +104,7 @@ func handleConnection(c net.Conn) {
 	// 	return
 	// }
 
-        // size = headerbuff[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
+	// size = headerbuff[HeaderLengthStarts : HeaderLengthStarts + HeaderLengthSize]
 	// sizeint = binary.LittleEndian.Uint32(size)
 
 	// _, err = c.Read(messagebuff)
@@ -142,5 +142,5 @@ func handleConnection(c net.Conn) {
 
 	// result := strconv.Itoa(random()) + "\n"
 	// c.Write([]byte(string(result)))
-        c.Close()
+	c.Close()
 }

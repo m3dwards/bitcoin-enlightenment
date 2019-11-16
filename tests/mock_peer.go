@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"net"
-	"time"
-
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/peer"
 	"github.com/btcsuite/btcd/wire"
+	"log"
+	"net"
+	"os"
+	"time"
 )
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for
@@ -78,6 +79,7 @@ func main() {
 			},
 		},
 	}
+	log.SetOutput(os.Stdout)
 	p, err := peer.NewOutboundPeer(peerCfg, "127.0.0.1:12002")
 	if err != nil {
 		fmt.Printf("NewOutboundPeer: error %v\n", err)
@@ -91,7 +93,7 @@ func main() {
 		return
 	}
 	p.AssociateConnection(conn)
-
+	log.Println("connection associated")
 	// Wait for the verack message or timeout in case of failure.
 	select {
 	case <-verack:
@@ -100,6 +102,7 @@ func main() {
 	}
 
 	// Disconnect the peer.
+	fmt.Println("I'm going to try and disconnect now")
 	p.Disconnect()
 	p.WaitForDisconnect()
 

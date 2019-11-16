@@ -59,7 +59,7 @@ func main() {
 	}
 }
 
-func createVerack() []byte {
+func createVersion() []byte {
 	decoded, err := hex.DecodeString(strings.Replace("16 1c 14 12 76 65 72 73 69 6f 6e 00 00 00 00 00 64 00 00 00 35 8d 49 32 62 ea 00 00 01 00 00 00 00 00 00 00 11 b2 d0 50 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 3b 2e b3 5d 8c e6 17 65 0f 2f 53 61 74 6f 73 68 69 3a 30 2e 37 2e 32 2f c0 3e 03 00", " ", "", -1))
 	if err != nil {
 		fmt.Println("Error decoding hex:", err.Error())
@@ -68,9 +68,7 @@ func createVerack() []byte {
 	return decoded
 }
 
-func handleConnection(c net.Conn) {
-	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
-
+func readMessageAndPrintIt(c net.Conn) {
 	headerbuff := make([]byte, HeaderSize)
 
 	_, err := c.Read(headerbuff)
@@ -81,9 +79,8 @@ func handleConnection(c net.Conn) {
 	HeaderLengthStarts := HeaderMagicSize + HeaderCommandSize
 	size := headerbuff[HeaderLengthStarts : HeaderLengthStarts+HeaderLengthSize]
 	sizeint := binary.LittleEndian.Uint32(size)
-	fmt.Println(size)
-	fmt.Println(sizeint)
 	messagebuff := make([]byte, sizeint)
+
 	// read the full message, or return an error
 	_, err = c.Read(messagebuff)
 	if err != nil {
@@ -91,10 +88,18 @@ func handleConnection(c net.Conn) {
 		return
 	}
 
+	fmt.Println("Message Received")
 	fmt.Printf("received header %x\n", headerbuff)
 	fmt.Printf("received %x\n", messagebuff)
+	fmt.Println("")
 
-	c.Write(createVerack())
+}
+
+func handleConnection(c net.Conn) {
+	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
+
+	readMessageAndPrintIt(c)
+	c.Write(createVersion())
 
 	// time.Sleep(200 * time.Millisecond)
 
@@ -113,10 +118,12 @@ func handleConnection(c net.Conn) {
 	// 	return
 	// }
 
-	time.Sleep(200 * time.Millisecond)
-	// c.Write([]byte{0x16, 0x1c, 0x14, 0x14, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xF6, 0xE0, 0xE2})
+	readMessageAndPrintIt(c)
+
+	c.Write([]byte{0x16, 0x1c, 0x14, 0x14, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xF6, 0xE0, 0xE2})
 
 	time.Sleep(2000 * time.Millisecond)
+	// c.Write([]byte{0x16, 0x1c, 0x14, 0x14, 0x76, 0x65, 0x72, 0x61, 0x63, 0x6B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xF6, 0xE0, 0xE2})
 
 	// buf := make([]byte, 1024)
 	// // Read the incoming connection into the buffer.

@@ -35,13 +35,16 @@ func random() int {
 }
 
 func init() {
-	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 	log.SetReportCaller(true)
 }
 
 func main() {
+	if "development" != "development" {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
+
 	arguments := os.Args
 	if len(arguments) == 1 {
 		fmt.Println("Please provide a port number!")
@@ -56,6 +59,9 @@ func main() {
 	}
 	defer l.Close()
 	rand.Seed(time.Now().Unix())
+	log.WithFields(log.Fields{
+		"port": PORT,
+	}).Info("Server started")
 
 	for {
 		c, err := l.Accept()
@@ -70,7 +76,7 @@ func main() {
 func createVersion() []byte {
 	decoded, err := hex.DecodeString(strings.Replace("16 1c 14 12 76 65 72 73 69 6f 6e 00 00 00 00 00 64 00 00 00 35 8d 49 32 62 ea 00 00 01 00 00 00 00 00 00 00 11 b2 d0 50 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00 3b 2e b3 5d 8c e6 17 65 0f 2f 53 61 74 6f 73 68 69 3a 30 2e 37 2e 32 2f c0 3e 03 00", " ", "", -1))
 	if err != nil {
-		fmt.Println("Error decoding hex:", err.Error())
+		log.WithFields(log.Fields{"error": err.Error()}).Error("Error decoding hex", err.Error())
 		return nil
 	}
 	return decoded
@@ -81,7 +87,7 @@ func readMessageAndPrintIt(c net.Conn) {
 
 	_, err := c.Read(headerbuff)
 	if err != nil {
-		fmt.Println("Error reading header:", err.Error())
+		log.WithFields(log.Fields{"error": err.Error()}).Error("Error reading header")
 		return
 	}
 	HeaderLengthStarts := HeaderMagicSize + HeaderCommandSize
@@ -92,19 +98,16 @@ func readMessageAndPrintIt(c net.Conn) {
 	// read the full message, or return an error
 	_, err = c.Read(messagebuff)
 	if err != nil {
-		fmt.Println("Error reading body:", err.Error())
+		log.WithFields(log.Fields{"error": err.Error()}).Error("Error reading body:", err.Error())
 		return
 	}
 
-	fmt.Println("Message Received")
-	fmt.Printf("received header %x\n", headerbuff)
-	fmt.Printf("received %x\n", messagebuff)
-	fmt.Println("")
+	log.WithFields(log.Fields{"header": headerbuff, "body": messagebuff}).Debug("Message Received")
 
 }
 
 func handleConnection(c net.Conn) {
-	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
+	log.WithFields(log.Fields{"remote_address": c.RemoteAddr().String()}).Debug("Serving inbound connection")
 
 	readMessageAndPrintIt(c)
 	c.Write(createVersion())

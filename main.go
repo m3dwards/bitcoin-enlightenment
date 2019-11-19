@@ -10,7 +10,7 @@ import (
 	// "strconv"
 	"encoding/binary"
 	"encoding/hex"
-	log "github.com/sirupsen/logrus"
+	//log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
@@ -32,12 +32,6 @@ const MAX = 100
 
 func random() int {
 	return rand.Intn(MAX-MIN) + MIN
-}
-
-func init() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
-	log.SetReportCaller(true)
 }
 
 func main() {

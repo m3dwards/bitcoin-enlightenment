@@ -13,6 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
+	"crypto/sha256"
+
 )
 
 // Size in bytes of the various parts of a message header
@@ -56,6 +58,10 @@ func main() {
 	log.WithFields(log.Fields{
 		"port": PORT,
 	}).Info("Server started")
+	first256 := (sha256.New()).Sum(nil)
+	secondhash := sha256.New()
+	secondhash.Write(first256)
+	log.Info(hex.EncodeToString(secondhash.Sum(nil)))
 
 	for {
 		c, err := l.Accept()

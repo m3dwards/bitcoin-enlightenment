@@ -10,7 +10,7 @@ import (
 	// "strconv"
 	"encoding/binary"
 	"encoding/hex"
-	//log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )

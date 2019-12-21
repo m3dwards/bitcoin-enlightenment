@@ -10,5 +10,3 @@ func init() {
 	logo.SetLevel(logo.DebugLevel)
 	logo.SetReportCaller(true)
 }
-
-var log string
